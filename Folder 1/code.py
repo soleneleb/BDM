@@ -5,6 +5,15 @@ import pandas as pd
 import seaborn as sns
 import warnings
 from collections import OrderedDict
+def plot_value_counts(data, column_name):
+    value_counts = data[column_name].value_counts()
+    value_counts.plot(kind='bar', color='skyblue', edgecolor='k', linewidth=2)
+    plt.xlabel(column_name)
+    plt.ylabel('Count')
+    plt.title(f'Value Counts of {column_name}')
+    plt.show()
+
+
 
 # Ignore FutureWarnings
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -169,3 +178,16 @@ category2 = 'Target'
 # Create a categorical strip plot
 sns.catplot(x=category1, y=category2, data=train, kind='strip')
 plt.show()
+
+
+
+category1 = 'escolari'
+category2 = 'Target'
+
+# Create a categorical strip plot
+sns.catplot(x=category1, y=category2, data=train, kind='strip')
+plt.show()
+
+plot_value_counts(data[data['rez_esc'].isnull()], 'Target')
+
+plot_value_counts(data[data['v2a1'].isnull()], 'Target')

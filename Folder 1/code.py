@@ -14,7 +14,6 @@ def plot_value_counts(data, column_name):
     plt.show()
 
 
-
 # Ignore FutureWarnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -63,13 +62,13 @@ mapping = {"yes": 1, "no": 0}
 
 # Apply the mapping to both train and test data
 for df in [train, test]:
-    df['dependency'] = df['dependency'].replace(mapping).astype(np.float64)
-    df['edjefa'] = df['edjefa'].replace(mapping).astype(np.float64)
-    df['edjefe'] = df['edjefe'].replace(mapping).astype(np.float64)
+    df['dependency'] = df['Dependency rate'].replace(mapping).astype(np.float64)
+    df['years of education of female head of household'] = df['years of education of female head of household'].replace(mapping).astype(np.float64)
+    df['years of education of male head of household'] = df['years of education of male head of household'].replace(mapping).astype(np.float64)
 
 # Visualize the distribution of 'dependency', 'edjefa', and 'edjefe' columns
 plt.figure(figsize=(16, 12))
-for i, col in enumerate(['dependency', 'edjefa', 'edjefe']):
+for i, col in enumerate(['dependency', 'years of education of female head of household', 'years of education of male head of household']):
     ax = plt.subplot(3, 1, i + 1)
     for poverty_level, color in colors.items():
         sns.kdeplot(train.loc[train['Target'] == poverty_level, col].dropna(),
@@ -84,10 +83,10 @@ test['Target'] = np.nan
 data = pd.concat([train, test], ignore_index=True)
 
 # Identify heads of households
-heads = data.loc[data['parentesco1'] == 1].copy()
+heads = data.loc[data['=1 if household head'] == 1].copy()
 
 # Labels for training
-train_labels = data.loc[(data['Target'].notnull()) & (data['parentesco1'] == 1), ['Target', 'idhogar']]
+train_labels = data.loc[(data['Target'].notnull()) & (data['=1 if household head'] == 1), ['Target', 'Household level identifier']]
 
 # Visualize the distribution of poverty levels
 label_counts = train_labels['Target'].value_counts().sort_index()
@@ -98,26 +97,26 @@ plt.xticks([x - 1 for x in poverty_mapping.keys()], list(poverty_mapping.values(
 plt.title('Poverty Level Breakdown')
 
 # Identify households where family members do not have the same target
-all_equal = train.groupby('idhogar')['Target'].apply(lambda x: x.nunique() == 1)
+all_equal = train.groupby('Household level identifier')['Target'].apply(lambda x: x.nunique() == 1)
 not_equal = all_equal[all_equal != True]
 print('There are {} households where the family members do not all have the same target.'.format(len(not_equal)))
 
 # Handle households without a head
-households_leader = train.groupby('idhogar')['parentesco1'].sum()
-households_no_head = train.loc[train['idhogar'].isin(households_leader[households_leader == 0].index), :]
-print('There are {} households without a head.'.format(households_no_head['idhogar'].nunique()))
+households_leader = train.groupby('Household level identifier')['=1 if household head'].sum()
+households_no_head = train.loc[train['Household level identifier'].isin(households_leader[households_leader == 0].index), :]
+print('There are {} households without a head.'.format(households_no_head['Household level identifier'].nunique()))
 
 # Check households without a head and different labels
-households_no_head_equal = households_no_head.groupby('idhogar')['Target'].apply(lambda x: x.nunique() == 1)
+households_no_head_equal = households_no_head.groupby('Household level identifier')['Target'].apply(lambda x: x.nunique() == 1)
 print('{} Households with no head have different labels.'.format(sum(households_no_head_equal == False)))
 
 # Set the correct target label for each household
 for household in not_equal.index:
-    true_target = int(train[(train['idhogar'] == household) & (train['parentesco1'] == 1.0)]['Target'].iloc[0])
-    train.loc[train['idhogar'] == household, 'Target'] = true_target
+    true_target = int(train[(train['Household level identifier'] == household) & (train['=1 if household head'] == 1.0)]['Target'].iloc[0])
+    train.loc[train['Household level identifier'] == household, 'Target'] = true_target
 
 # Check again for households where family members do not have the same target
-all_equal = train.groupby('idhogar')['Target'].apply(lambda x: x.nunique() == 1)
+all_equal = train.groupby('Household level identifier')['Target'].apply(lambda x: x.nunique() == 1)
 not_equal = all_equal[all_equal != True]
 print('There are {} households where the family members do not all have the same target.'.format(len(not_equal)))
 
@@ -172,7 +171,7 @@ def plot_categoricals(x, y, data, annotate=True):
     plt.title(f"{y} vs {x}")
 
 # Example: Displaying the categorical strip plot
-category1 = 'rez_esc'
+category1 = 'Years behind in school'
 category2 = 'Target'
 
 # Create a categorical strip plot
@@ -180,14 +179,13 @@ sns.catplot(x=category1, y=category2, data=train, kind='strip')
 plt.show()
 
 
-
-category1 = 'escolari'
+category1 = 'years of schooling'
 category2 = 'Target'
 
 # Create a categorical strip plot
 sns.catplot(x=category1, y=category2, data=train, kind='strip')
 plt.show()
 
-plot_value_counts(data[data['rez_esc'].isnull()], 'Target')
+plot_value_counts(data[data['Years behind in school'].isnull()], 'Target')
 
-plot_value_counts(data[data['v2a1'].isnull()], 'Target')
+plot_value_counts(data[data['Monthly rent payment'].isnull()], 'Target')

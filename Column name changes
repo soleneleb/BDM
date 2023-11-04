@@ -1,0 +1,27 @@
+import pandas as pd
+
+# Read the train file
+train_file = pd.read_csv('train.csv')
+
+# Read the correspondence file
+correspondences = pd.read_csv('Correspondences.csv', sep = ";")
+
+# Create a dictionary of correspondence between the columns
+correspondence_dict = dict(zip(correspondences['OldName'], correspondences['NewName']))
+
+# Replace the name of the columns in the train file
+train_file.rename(columns=correspondence_dict, inplace=True)
+
+# Save the file with the updated column names 
+train_file.to_csv('updated_train.csv', index=False)
+
+
+# Same process but for the test file 
+test_file = pd.read_csv('test.csv')
+
+
+# Replace the name of the columns in the train file
+test_file.rename(columns=correspondence_dict, inplace=True)
+
+# Save the file with the updated column names 
+test_file.to_csv('updated_test.csv', index=False)
